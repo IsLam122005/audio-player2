@@ -25,6 +25,14 @@ void PlayerAudio::releaseResources()
     transportSource.releaseResources();
     readerSource.reset();
 }
+void PlayerAudio::toggleLooping(bool shouldLoop)
+{
+    isLooping = shouldLoop;
+    if (readerSource != nullptr)
+    {
+        readerSource->setLooping(isLooping);
+    }
+}
 
 bool PlayerAudio::loadFile(const juce::File& file)
 {
@@ -33,7 +41,7 @@ bool PlayerAudio::loadFile(const juce::File& file)
         transportSource.stop();
         transportSource.setSource(nullptr);
         readerSource.reset();
-        readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+        readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, isLooping);
         transportSource.setSource(readerSource.get(), 0, nullptr, reader->sampleRate);
         transportSource.start();
         return true;

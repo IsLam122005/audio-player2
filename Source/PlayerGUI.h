@@ -23,6 +23,7 @@ private:
     juce::TextButton loadButton{ "Load File" };
     juce::TextButton restartButton{ "Restart" };
     juce::TextButton stopButton{ "Stop" };
+    juce::TextButton loopButton{ "Loop" };
     juce::Slider volumeSlider;
     juce::TextButton muteButton{ "Mute" };
     std::unique_ptr<juce::FileChooser> fileChooser;
