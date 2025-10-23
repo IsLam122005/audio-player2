@@ -1,0 +1,25 @@
+# JUCE specific
+**/JuceLibraryCode/
+**/Builds/
+*.jucer.user
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+**/x64/
+**/Win32/
+**/Debug/
+**/Release/
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/

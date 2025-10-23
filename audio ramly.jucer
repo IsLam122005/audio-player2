@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="RyOrKi" name="audio ramly" projectType="guiapp" useAppConfig="1"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+  <MAINGROUP id="ezk7xs" name="audio ramly">
+    <GROUP id="{3F8BF8C0-30A6-5E8A-8106-26230CE4C17C}" name="Source">
+      <FILE id="MsmpOt" name="Main.cpp" compile="1" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/Main.cpp"/>
+      <FILE id="vohubs" name="MainComponent.cpp" compile="1" resource="0"
+            file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/MainComponent.cpp"/>
+      <FILE id="CxvV8J" name="MainComponent.h" compile="0" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/MainComponent.h"/>
+      <FILE id="Aj68BA" name="PlayerAudio.cpp" compile="1" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/PlayerAudio.cpp"/>
+      <FILE id="xdNkyl" name="PlayerAudio.h" compile="0" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/PlayerAudio.h"/>
+      <FILE id="Zt01yS" name="PlayerGUI.cpp" compile="1" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/PlayerGUI.cpp"/>
+      <FILE id="qaqoZB" name="PlayerGUI.h" compile="0" resource="0" file="../../../Users/hp/Downloads/&#1575;&#1604;&#1585;&#1605;&#1604;&#1610; opp/ass2/PlayerGUI.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="audio ramly"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="audio ramly"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../Users/hp/Downloads/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../Users/hp/Downloads/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
