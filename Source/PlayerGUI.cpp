@@ -2,7 +2,7 @@
 
 PlayerGUI::PlayerGUI()
 {
-    for (auto* btn : { &loadButton, &restartButton , &stopButton, &muteButton,&loopButton, &backwardButton, &forwardButton })
+    for (auto* btn : { &loadButton, &restartButton , &stopButton, &muteButton,&loopButton, &backwardButton, &forwardButton, &playPauseButton, &goToStartButton, &goToEndButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
@@ -24,32 +24,43 @@ void PlayerGUI::paint(juce::Graphics& g)
 
 void PlayerGUI::resized()
 {
-    int y = 20;
+    int y_row1 = 20;   
+    int y_row2 = 80;  
     int buttonHeight = 40;
-    int buttonWidth = 70; // تم تصغير العرض لاستيعاب جميع الأزرار
+    int gap = 10;      
+    int x = gap;
 
-    // الزر 1: Load (عرض 100)
-    loadButton.setBounds(10, y, 100, buttonHeight);
+    loadButton.setBounds(x, y_row1, 100, buttonHeight);
+    x += 100 + gap;
 
-    // الزر 2: Restart (عرض 70)
-    restartButton.setBounds(120, y, buttonWidth, buttonHeight);
+    goToStartButton.setBounds(x, y_row1, 70, buttonHeight);
+    x += 70 + gap; 
 
-    // الزر 3: Stop (عرض 70)
-    stopButton.setBounds(200, y, buttonWidth, buttonHeight);
+    backwardButton.setBounds(x, y_row1, 70, buttonHeight);
+    x += 70 + gap; 
 
-    // الزر 4: Loop (عرض 70)
-    loopButton.setBounds(280, y, buttonWidth, buttonHeight);
+    playPauseButton.setBounds(x, y_row1, 70, buttonHeight);
+    x += 70 + gap;
 
-    // الزر 5: << 10s (الجديد)
-    backwardButton.setBounds(360, y, buttonWidth, buttonHeight);
+    forwardButton.setBounds(x, y_row1, 70, buttonHeight);
+    x += 70 + gap; 
 
-    // الزر 6: 10s >> (الجديد)
-    forwardButton.setBounds(440, y, buttonWidth, buttonHeight);
+    goToEndButton.setBounds(x, y_row1, 70, buttonHeight);
+    x += 70 + gap;
 
-    // الزر 7: Mute (عرض 70)
-    muteButton.setBounds(520, y, 70, 40);
+    stopButton.setBounds(x, y_row1, 70, buttonHeight);
+    x = gap; 
 
-    volumeSlider.setBounds(20, 100, getWidth() - 40, 30);
+    restartButton.setBounds(x, y_row2, 80, buttonHeight);
+    x += 80 + gap;
+
+    loopButton.setBounds(x, y_row2, 80, buttonHeight);
+    x += 80 + gap;
+
+    muteButton.setBounds(x, y_row2, 80, buttonHeight);
+    x += 80 + gap;
+
+    volumeSlider.setBounds(x, y_row2 + 5, getWidth() - x - gap, 30);
 }
 
 void PlayerGUI::buttonClicked(juce::Button* button)
@@ -69,6 +80,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 if (file.existsAsFile())
                 {
                     playerAudio.loadFile(file);
+                    playPauseButton.setButtonText("Pause");
                 }
             });
     }
@@ -76,24 +88,50 @@ void PlayerGUI::buttonClicked(juce::Button* button)
     if (button == &restartButton)
     {
         playerAudio.play();
+        playPauseButton.setButtonText("Pause");
     }
 
     if (button == &stopButton)
     {
         playerAudio.stop();
+        playPauseButton.setButtonText("Play"); 
     }
 
-    // الجديد: منطق القفز للأمام
     if (button == &forwardButton)
     {
         playerAudio.jumpForward(10.0);
     }
-
-    // الجديد: منطق القفز للخلف
     if (button == &backwardButton)
     {
         playerAudio.jumpBackward(10.0);
     }
+
+
+    if (button == &playPauseButton)
+    {
+        playerAudio.togglePlayPause();
+        if (playerAudio.isPlaying())
+        {
+            playPauseButton.setButtonText("Pause");
+        }
+        else
+        {
+            playPauseButton.setButtonText("Play");
+        }
+    }
+
+    if (button == &goToStartButton)
+    {
+        playerAudio.setPosition(0.0);
+    }
+
+    if (button == &goToEndButton)
+    {
+        double trackLength = playerAudio.getLength();
+        if (trackLength > 0.0)
+            playerAudio.setPosition(trackLength - 0.01);
+    }
+
 
     if (button == &muteButton)
     {
@@ -146,4 +184,20 @@ void PlayerGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFi
 void PlayerGUI::releaseResources()
 {
     playerAudio.releaseResources();
+}
+void PlayerAudio::togglePlayPause()
+{
+    if (transportSource.isPlaying())
+    {
+        transportSource.stop(); 
+    }
+    else
+    {
+        transportSource.start(); 
+    }
+}
+
+bool PlayerAudio::isPlaying() const
+{
+    return transportSource.isPlaying();
 }
