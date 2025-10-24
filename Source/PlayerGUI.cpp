@@ -30,7 +30,7 @@ void PlayerGUI::resized()
     restartButton.setBounds(140, y, 80, 40);
     stopButton.setBounds(240, y, 80, 40);
     loopButton.setBounds(340, y, 80, 40);
-    muteButton.setBounds(340, y, 80, 40);
+    muteButton.setBounds(440, y, 80, 40);
 
     volumeSlider.setBounds(20, 100, getWidth() - 40, 30);
 }
