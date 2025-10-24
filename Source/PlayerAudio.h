@@ -21,6 +21,8 @@ public:
     double getPosition() const;
     double getLength() const;
     float toggleMute();
+    void jumpForward(double seconds);
+    void jumpBackward(double seconds);
 
 private:
     juce::AudioFormatManager formatManager;
