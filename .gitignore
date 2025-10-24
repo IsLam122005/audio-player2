@@ -10,16 +10,15 @@
 Thumbs.db
 
 # Visual Studio
-*.sln
-*.vcxproj
-*.vcxproj.filters
+.vs/
+*.sln.docstates
+*.suo
+*.wsuo
+*.user
 *.vcxproj.user
-**/x64/
-**/Win32/
+**/ipch/
+**/Generated Files/
 **/Debug/
 **/Release/
-
-# Xcode
-*.xcodeproj
-*.xcworkspace
-xcuserdata/
+**/x64/
+**/Win32/

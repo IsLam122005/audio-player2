@@ -16,6 +16,7 @@ public:
     void stop();
     void setGain(float gain);
     void setPosition(double pos);
+    void toggleLooping(bool shouldLoop);
 
     double getPosition() const;
     double getLength() const;
@@ -27,4 +28,5 @@ private:
     juce::AudioTransportSource transportSource;
     bool isMuted = false;
     float volumeBeforeMute = 0.5f;
+    bool isLooping = false;
 };
