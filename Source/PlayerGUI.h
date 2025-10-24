@@ -30,6 +30,9 @@ private:
 
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
+    juce::TextButton backwardButton{ "<< 10s" };
+    juce::TextButton forwardButton{ "10s >>" };
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
