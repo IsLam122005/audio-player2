@@ -185,19 +185,5 @@ void PlayerGUI::releaseResources()
 {
     playerAudio.releaseResources();
 }
-void PlayerAudio::togglePlayPause()
-{
-    if (transportSource.isPlaying())
-    {
-        transportSource.stop(); 
-    }
-    else
-    {
-        transportSource.start(); 
-    }
-}
 
-bool PlayerAudio::isPlaying() const
-{
-    return transportSource.isPlaying();
-}
+

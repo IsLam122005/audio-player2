@@ -128,3 +128,18 @@ void PlayerAudio::jumpBackward(double seconds)
 
     transportSource.setPosition(newPosition);
 }
+void PlayerAudio::togglePlayPause()
+{
+    if (transportSource.isPlaying())
+    {
+        transportSource.stop();
+    }
+    else
+    {
+        transportSource.start();
+    }
+}
+bool PlayerAudio::isPlaying() const
+{
+    return transportSource.isPlaying();
+}
