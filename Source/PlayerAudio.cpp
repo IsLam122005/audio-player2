@@ -76,7 +76,6 @@ double PlayerAudio::getPosition() const
 double PlayerAudio::getLength() const
 {
     if (readerSource != nullptr)
-        // تم التعديل لإرجاع الطول بالثواني ( samples / sampleRate)
         return readerSource->getTotalLength() / readerSource->getAudioFormatReader()->sampleRate;
     return 0.0;
 }
@@ -98,12 +97,8 @@ float PlayerAudio::toggleMute()
         transportSource.setGain(volumeBeforeMute);
         return volumeBeforeMute;
     }
-} // هنا نهاية دالة toggleMute الصحيحة (تم إزالة الدوال الأخرى من داخلها)
+} 
 
-
-// ------------------------------------------------------------------
-// الدوال الجديدة والمعدلة (تم وضعها خارج نطاق دالة toggleMute)
-// ------------------------------------------------------------------
 
 void PlayerAudio::setPosition(double pos)
 {
@@ -117,9 +112,8 @@ void PlayerAudio::jumpForward(double seconds)
 
     if (trackLength > 0.0)
     {
-        // نوقف النط عند آخر التراك
         if (newPosition > trackLength)
-            newPosition = trackLength - 0.01; // نقف قبل النهاية بفرق بسيط
+            newPosition = trackLength - 0.01;
 
         transportSource.setPosition(newPosition);
     }
@@ -129,7 +123,6 @@ void PlayerAudio::jumpBackward(double seconds)
 {
     double newPosition = transportSource.getCurrentPosition() - seconds;
 
-    // نوقف النط عند بداية التراك (صفر)
     if (newPosition < 0.0)
         newPosition = 0.0;
 

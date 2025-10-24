@@ -23,6 +23,8 @@ public:
     float toggleMute();
     void jumpForward(double seconds);
     void jumpBackward(double seconds);
+    void togglePlayPause();
+    bool isPlaying() const;
 
 private:
     juce::AudioFormatManager formatManager;
