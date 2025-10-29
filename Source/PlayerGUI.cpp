@@ -2,7 +2,7 @@
 
 PlayerGUI::PlayerGUI()
 {
-    for (auto* btn : { &loadButton, &restartButton , &stopButton, &muteButton,&loopButton, &backwardButton, &forwardButton, &playPauseButton, &goToStartButton, &goToEndButton })
+    for (auto* btn : { &loadButton, &restartButton , &stopButton, &muteButton,&loopButton, &backwardButton, &forwardButton, &playPauseButton, &goToStartButton, &goToEndButton, &setAButton, &setBButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
@@ -11,57 +11,106 @@ PlayerGUI::PlayerGUI()
     volumeSlider.setValue(0.5);
     volumeSlider.addListener(this);
     addAndMakeVisible(volumeSlider);
+    addAndMakeVisible(positionSlider);
+    positionSlider.addListener(this);
+    positionSlider.setRange(0.0, 1.0); 
+    positionSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    addAndMakeVisible(timeLabel);
+    timeLabel.setText("00:00 / 00:00", juce::dontSendNotification);
+    timeLabel.setJustificationType(juce::Justification::centredRight);
+    startTimerHz(30);
+    setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+    setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+    setBButton.setEnabled(false); 
+    
+}
+juce::String PlayerGUI::formatTime(double seconds)
+{
+    int totalSeconds = static_cast<int>(std::round(seconds));
+    int mins = totalSeconds / 60;
+    int secs = totalSeconds % 60;
+    return juce::String::formatted("%02d:%02d", mins, secs);
 }
 
 PlayerGUI::~PlayerGUI()
 {
+    stopTimer();
 }
 
 void PlayerGUI::paint(juce::Graphics& g)
 {
     g.fillAll(juce::Colours::darkgrey);
 }
+ void PlayerGUI::resized()
+    {
+      
+     int sliderRowHeight = 30;
+     int buttonHeight = 40;
+     int gap = 10;
+     int x = gap;
 
-void PlayerGUI::resized()
-{
-    int y_row1 = 20;   
-    int y_row2 = 80;  
-    int buttonHeight = 40;
-    int gap = 10;      
-    int x = gap;
+     
+     int y_slider_row = 20;
+     int timeLabelWidth = 120;
+     timeLabel.setBounds(getWidth() - timeLabelWidth - gap, y_slider_row, timeLabelWidth, sliderRowHeight);
+     positionSlider.setBounds(x, y_slider_row, getWidth() - timeLabelWidth - (gap * 3), sliderRowHeight);
 
-    loadButton.setBounds(x, y_row1, 100, buttonHeight);
-    x += 100 + gap;
+    
+     int y_row1 = y_slider_row + sliderRowHeight + gap;
+     loadButton.setBounds(x, y_row1, 100, buttonHeight);
+     x += 100 + gap;
 
-    goToStartButton.setBounds(x, y_row1, 70, buttonHeight);
-    x += 70 + gap; 
+     goToStartButton.setBounds(x, y_row1, 70, buttonHeight);
+     x += 70 + gap;
 
-    backwardButton.setBounds(x, y_row1, 70, buttonHeight);
-    x += 70 + gap; 
+     backwardButton.setBounds(x, y_row1, 70, buttonHeight);
+     x += 70 + gap;
 
-    playPauseButton.setBounds(x, y_row1, 70, buttonHeight);
-    x += 70 + gap;
+     playPauseButton.setBounds(x, y_row1, 70, buttonHeight);
+     x += 70 + gap;
 
-    forwardButton.setBounds(x, y_row1, 70, buttonHeight);
-    x += 70 + gap; 
+     forwardButton.setBounds(x, y_row1, 70, buttonHeight);
+     x += 70 + gap;
 
-    goToEndButton.setBounds(x, y_row1, 70, buttonHeight);
-    x += 70 + gap;
+     goToEndButton.setBounds(x, y_row1, 70, buttonHeight);
+     x += 70 + gap;
 
-    stopButton.setBounds(x, y_row1, 70, buttonHeight);
-    x = gap; 
+     stopButton.setBounds(x, y_row1, 70, buttonHeight);
+     x = gap;
 
-    restartButton.setBounds(x, y_row2, 80, buttonHeight);
-    x += 80 + gap;
+    
+     int y_row2 = y_row1 + buttonHeight + gap;
+     restartButton.setBounds(x, y_row2, 80, buttonHeight);
+     x += 80 + gap;
 
-    loopButton.setBounds(x, y_row2, 80, buttonHeight);
-    x += 80 + gap;
+     loopButton.setBounds(x, y_row2, 80, buttonHeight);
+     x += 80 + gap;
 
-    muteButton.setBounds(x, y_row2, 80, buttonHeight);
-    x += 80 + gap;
+     
+     setAButton.setBounds(x, y_row2, 60, buttonHeight); 
+     x += 60 + gap;
 
-    volumeSlider.setBounds(x, y_row2 + 5, getWidth() - x - gap, 30);
-}
+     setBButton.setBounds(x, y_row2, 60, buttonHeight); 
+     x += 60 + gap;
+
+     muteButton.setBounds(x, y_row2, 80, buttonHeight);
+     x += 80 + gap;
+
+     volumeSlider.setBounds(x, y_row2 + 5, getWidth() - x - gap, 30);
+    }
+ void PlayerGUI::resetABLoop()
+ {
+     loopPointA = -1.0;
+     loopPointB = -1.0;
+     setAButton.setButtonText("Set A");
+     setBButton.setButtonText("Set B");
+     setBButton.setEnabled(false); 
+     setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+     setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+ }
+ 
+ 
+
 
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
@@ -81,6 +130,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 {
                     playerAudio.loadFile(file);
                     playPauseButton.setButtonText("Pause");
+                    resetABLoop();
                 }
             });
     }
@@ -158,6 +208,41 @@ void PlayerGUI::buttonClicked(juce::Button* button)
         else
             button->setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
     }
+    if (button == &setAButton)
+    {
+        if (loopPointA == -1.0) 
+        {
+            loopPointA = playerAudio.getPosition(); 
+            setAButton.setButtonText("A Set");
+            setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green.darker(0.3f));
+            setBButton.setEnabled(true); 
+        }
+        else 
+        {
+            resetABLoop(); 
+        }
+    }
+
+    if (button == &setBButton)
+    {
+        if (loopPointB == -1.0) 
+        {
+            double currentPos = playerAudio.getPosition();
+            if (currentPos > loopPointA) 
+            {
+                loopPointB = currentPos; 
+                setBButton.setButtonText("B Set");
+                setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::red.darker(0.3f));
+            }
+            
+        }
+        else 
+        {
+            loopPointB = -1.0; 
+            setBButton.setButtonText("Set B");
+            setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+        }
+    }
 }
 
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
@@ -169,6 +254,35 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
      
         muteButton.setButtonText("Mute");
     }
+    if (slider == &positionSlider)
+    {
+        if (slider->isMouseButtonDown())
+        {
+            playerAudio.setPosition(slider->getValue());
+        }
+    }
+}
+void PlayerGUI::timerCallback()
+{
+    double trackLength = playerAudio.getLength();
+    double currentPos = playerAudio.getPosition();
+
+    positionSlider.setRange(0.0, trackLength, juce::dontSendNotification);
+    if (loopPointA != -1.0 && loopPointB != -1.0) 
+    {
+        
+        if (currentPos >= loopPointB)
+        {
+            
+            playerAudio.setPosition(loopPointA);
+            
+            currentPos = loopPointA;
+        }
+    }
+    positionSlider.setValue(currentPos, juce::dontSendNotification);
+
+    timeLabel.setText(formatTime(currentPos) + " / " + formatTime(trackLength),
+        juce::dontSendNotification);
 }
 
 void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
