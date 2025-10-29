@@ -4,7 +4,9 @@
 
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
-    public juce::Slider::Listener
+    public juce::Slider::Listener,
+    public juce::Timer 
+    
 {
 public:
     PlayerGUI();
@@ -35,7 +37,16 @@ private:
     juce::TextButton playPauseButton{ "Play" }; 
     juce::TextButton goToStartButton{ "Start" };
     juce::TextButton goToEndButton{ "End" }; 
-
+    juce::Slider positionSlider;
+    juce::Label timeLabel;  
+    juce::String formatTime(double seconds);
+    juce::TextButton setAButton{ "Set A" };
+    juce::TextButton setBButton{ "Set B" };
+    double loopPointA = -1.0; 
+    double loopPointB = -1.0;
+    void resetABLoop();
+    void timerCallback() override;
+    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
