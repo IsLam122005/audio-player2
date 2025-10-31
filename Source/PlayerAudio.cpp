@@ -1,6 +1,7 @@
-﻿#include "PlayerAudio.h"
+#include "PlayerAudio.h"
 
 PlayerAudio::PlayerAudio()
+    : storedSamplesPerBlock(0), storedSampleRate(0.0)
 {
     formatManager.registerBasicFormats();
 }
@@ -12,16 +13,32 @@ PlayerAudio::~PlayerAudio()
 
 void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
+    storedSamplesPerBlock = samplesPerBlockExpected;
+    storedSampleRate = sampleRate;
+
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+
+    if (resamplingSource != nullptr)
+    {
+        resamplingSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    }
 }
 
 void PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    transportSource.getNextAudioBlock(bufferToFill);
+    if (resamplingSource != nullptr)
+    {
+        resamplingSource->getNextAudioBlock(bufferToFill);
+    }
+    else
+    {
+        bufferToFill.clearActiveBufferRegion();
+    }
 }
 
 void PlayerAudio::releaseResources()
 {
+    resamplingSource.reset();
     transportSource.releaseResources();
     readerSource.reset();
 }
@@ -40,9 +57,21 @@ bool PlayerAudio::loadFile(const juce::File& file)
     {
         transportSource.stop();
         transportSource.setSource(nullptr);
+        resamplingSource.reset();
         readerSource.reset();
+
         readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, isLooping);
+
         transportSource.setSource(readerSource.get(), 0, nullptr, reader->sampleRate);
+
+        resamplingSource = std::make_unique<juce::ResamplingAudioSource>(&transportSource, false, 2);
+
+        if (storedSampleRate > 0)
+        {
+            resamplingSource->prepareToPlay(storedSamplesPerBlock, storedSampleRate);
+        }
+
+        resamplingSource->setResamplingRatio(1.0);
         transportSource.start();
         return true;
     }
@@ -142,4 +171,11 @@ void PlayerAudio::togglePlayPause()
 bool PlayerAudio::isPlaying() const
 {
     return transportSource.isPlaying();
+}
+void PlayerAudio::setSpeed(double speed)
+{
+    if (resamplingSource != nullptr)
+    {
+        resamplingSource->setResamplingRatio(speed);
+    }
 }

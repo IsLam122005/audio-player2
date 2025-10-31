@@ -25,6 +25,7 @@ public:
     void jumpBackward(double seconds);
     void togglePlayPause();
     bool isPlaying() const;
+    void setSpeed(double speed);
 
 private:
     juce::AudioFormatManager formatManager;
@@ -33,4 +34,7 @@ private:
     bool isMuted = false;
     float volumeBeforeMute = 0.5f;
     bool isLooping = false;
+    std::unique_ptr<juce::ResamplingAudioSource> resamplingSource;
+    int storedSamplesPerBlock = 0;
+    double storedSampleRate = 0.0;
 };
