@@ -139,6 +139,8 @@ private:
     void goToNextMarker();
     void goToPrevMarker();
     void clearMarkers();
-
+    juce::GroupComponent playbackGroup;
+    juce::GroupComponent loopAndSettingsGroup;
+    juce::GroupComponent markerGroup;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };

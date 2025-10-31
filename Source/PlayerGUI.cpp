@@ -53,6 +53,15 @@ PlayerGUI::PlayerGUI()
     setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
     setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
     setBButton.setEnabled(false);
+
+    playbackGroup.setText("Playback Controls");
+    addAndMakeVisible(playbackGroup);
+
+    loopAndSettingsGroup.setText("Loop & Settings");
+    addAndMakeVisible(loopAndSettingsGroup);
+
+    markerGroup.setText("Track Markers");
+    addAndMakeVisible(markerGroup);
 }
 juce::String PlayerGUI::formatTime(double seconds)
 {
@@ -71,7 +80,6 @@ void PlayerGUI::paint(juce::Graphics& g)
 {
     g.fillAll(juce::Colours::darkgrey);
 }
-
 
 void PlayerGUI::resized()
 {
@@ -93,53 +101,64 @@ void PlayerGUI::resized()
     y += sliderRowHeight + gap;
 
     int buttonHeight = 40;
-    x = gap;
-    addFilesButton.setBounds(x, y, 100, buttonHeight);
-    x += 100 + gap;
-    goToStartButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    backwardButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    playPauseButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    forwardButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    goToEndButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    stopButton.setBounds(x, y, 70, buttonHeight);
+    int groupInternalPadding = 30;
+    int groupHeight = buttonHeight + groupInternalPadding + gap;
+    playbackGroup.setBounds(x, y, controlsWidth, groupHeight);
 
-    y += buttonHeight + gap;
-    x = gap;
+    int buttonY = y + groupInternalPadding;
+    int xPos = x + gap;
+    addFilesButton.setBounds(xPos, buttonY, 100, buttonHeight);
+    xPos += 100 + gap;
+    goToStartButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    backwardButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    playPauseButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    forwardButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    goToEndButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    stopButton.setBounds(xPos, buttonY, 70, buttonHeight);
 
-    restartButton.setBounds(x, y, 80, buttonHeight);
-    x += 80 + gap;
-    loopButton.setBounds(x, y, 80, buttonHeight);
-    x += 80 + gap;
-    setAButton.setBounds(x, y, 60, buttonHeight);
-    x += 60 + gap;
-    setBButton.setBounds(x, y, 60, buttonHeight);
-    x += 60 + gap;
-    muteButton.setBounds(x, y, 80, buttonHeight);
-    x += 80 + gap;
-    speedLabel.setBounds(x, y, 50, buttonHeight);
-    x += 50;
-    speedSlider.setBounds(x, y + 5, 120, 30);
-    x += 120 + gap;
-    volumeSlider.setBounds(x, y + 5, controlsWidth - x, 30);
+    y += groupHeight + gap;
+    loopAndSettingsGroup.setBounds(x, y, controlsWidth, groupHeight);
 
-    y += buttonHeight + gap;
-    x = gap;
-    addMarkerButton.setBounds(x, y, 100, buttonHeight);
-    x += 100 + gap;
-    prevMarkerButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    nextMarkerButton.setBounds(x, y, 70, buttonHeight);
-    x += 70 + gap;
-    clearMarkersButton.setBounds(x, y, 120, buttonHeight);
+    buttonY = y + groupInternalPadding;
+    xPos = x + gap;
+    restartButton.setBounds(xPos, buttonY, 80, buttonHeight);
+    xPos += 80 + gap;
+    loopButton.setBounds(xPos, buttonY, 80, buttonHeight);
+    xPos += 80 + gap;
+    setAButton.setBounds(xPos, buttonY, 60, buttonHeight);
+    xPos += 60 + gap;
+    setBButton.setBounds(xPos, buttonY, 60, buttonHeight);
+    xPos += 60 + gap;
+    muteButton.setBounds(xPos, buttonY, 80, buttonHeight);
+    xPos += 80 + gap;
+    speedLabel.setBounds(xPos, buttonY, 50, buttonHeight);
+    xPos += 50;
+    speedSlider.setBounds(xPos, buttonY + 5, 120, 30);
+    xPos += 120 + gap;
+    volumeSlider.setBounds(xPos, buttonY + 5, controlsWidth - xPos, 30);
+
+    y += groupHeight + gap; 
+
+    markerGroup.setBounds(x, y, controlsWidth, groupHeight);
+
+    buttonY = y + groupInternalPadding;
+    xPos = x + gap;
+    addMarkerButton.setBounds(xPos, buttonY, 100, buttonHeight);
+    xPos += 100 + gap;
+    prevMarkerButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    nextMarkerButton.setBounds(xPos, buttonY, 70, buttonHeight);
+    xPos += 70 + gap;
+    clearMarkersButton.setBounds(xPos, buttonY, 120, buttonHeight);
+
 
     playlistBox.setBounds(getWidth() - playlistWidth - gap, gap, playlistWidth, getHeight() - (gap * 2));
 }
-
 void PlayerGUI::resetABLoop()
 {
     loopPointA = -1.0;
@@ -186,6 +205,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 
     if (button == &restartButton)
     {
+        playerAudio.setPosition(0.0);
         playerAudio.play();
         playPauseButton.setButtonText("Pause");
     }
