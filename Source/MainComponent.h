@@ -17,6 +17,9 @@ public:
 
 private:
     PlayerGUI player1; 
+    juce::ApplicationProperties appProperties;
+    void saveLastSession();
+    void loadLastSession();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

@@ -2,16 +2,20 @@
 
 PlayerGUI::PlayerGUI()
     : thumbnail(512, formatManager, thumbnailCache),
-    thumbnailComponent(thumbnail)
+    thumbnailComponent(thumbnail, markers)
 {
     formatManager.registerBasicFormats();
     addAndMakeVisible(thumbnailComponent);
 
-    for (auto* btn : { &addFilesButton, &restartButton , &stopButton, &muteButton,&loopButton, &backwardButton, &forwardButton, &playPauseButton, &goToStartButton, &goToEndButton, &setAButton, &setBButton })
+    for (auto* btn : { &addFilesButton, &restartButton , &stopButton, &muteButton,&loopButton,
+                       &backwardButton, &forwardButton, &playPauseButton, &goToStartButton,
+                       &goToEndButton, &setAButton, &setBButton,
+                       &addMarkerButton, &nextMarkerButton, &prevMarkerButton, &clearMarkersButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
     }
+
     volumeSlider.setRange(0.0, 1.0, 0.01);
     volumeSlider.setValue(0.5);
     volumeSlider.addListener(this);
@@ -35,7 +39,7 @@ PlayerGUI::PlayerGUI()
     addAndMakeVisible(speedSlider);
     speedLabel.setText("Speed:", juce::dontSendNotification);
     addAndMakeVisible(speedLabel);
-    
+
     addAndMakeVisible(metadataLabel);
     metadataLabel.setText("No file loaded", juce::dontSendNotification);
     metadataLabel.setJustificationType(juce::Justification::centred);
@@ -67,13 +71,13 @@ void PlayerGUI::paint(juce::Graphics& g)
 {
     g.fillAll(juce::Colours::darkgrey);
 }
- 
+
 
 void PlayerGUI::resized()
 {
     int playlistWidth = 200;
     int gap = 10;
-    int controlsWidth = getWidth() - playlistWidth - (gap * 2); 
+    int controlsWidth = getWidth() - playlistWidth - (gap * 2);
     int x = gap;
     int y = gap;
 
@@ -106,7 +110,7 @@ void PlayerGUI::resized()
 
     y += buttonHeight + gap;
     x = gap;
-    
+
     restartButton.setBounds(x, y, 80, buttonHeight);
     x += 80 + gap;
     loopButton.setBounds(x, y, 80, buttonHeight);
@@ -123,36 +127,43 @@ void PlayerGUI::resized()
     x += 120 + gap;
     volumeSlider.setBounds(x, y + 5, controlsWidth - x, 30);
 
+    y += buttonHeight + gap;
+    x = gap;
+    addMarkerButton.setBounds(x, y, 100, buttonHeight);
+    x += 100 + gap;
+    prevMarkerButton.setBounds(x, y, 70, buttonHeight);
+    x += 70 + gap;
+    nextMarkerButton.setBounds(x, y, 70, buttonHeight);
+    x += 70 + gap;
+    clearMarkersButton.setBounds(x, y, 120, buttonHeight);
+
     playlistBox.setBounds(getWidth() - playlistWidth - gap, gap, playlistWidth, getHeight() - (gap * 2));
 }
 
 void PlayerGUI::resetABLoop()
- {
-     loopPointA = -1.0;
-     loopPointB = -1.0;
-     setAButton.setButtonText("Set A");
-     setBButton.setButtonText("Set B");
-     setBButton.setEnabled(false); 
-     setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
-     setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
- }
- 
- 
-
+{
+    loopPointA = -1.0;
+    loopPointB = -1.0;
+    setAButton.setButtonText("Set A");
+    setBButton.setButtonText("Set B");
+    setBButton.setEnabled(false);
+    setAButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+    setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+}
 
 
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
-    if (button == &addFilesButton) 
+    if (button == &addFilesButton)
     {
         fileChooser = std::make_unique<juce::FileChooser>(
-            "Select audio files...", 
+            "Select audio files...",
             juce::File{},
             "*.wav;*.mp3",
-            true); 
+            true);
 
         fileChooser->launchAsync(
-            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems, // <-- السماح بملفات متعددة
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::canSelectMultipleItems,
             [this](const juce::FileChooser& fc)
             {
                 auto files = fc.getResults();
@@ -160,14 +171,14 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 {
                     if (file.existsAsFile())
                     {
-                        playlist.add(file); 
+                        playlist.add(file);
                     }
                 }
-                playlistBox.updateContent(); 
-                
+                playlistBox.updateContent();
+
                 if (!playerAudio.isPlaying() && playlist.size() > 0)
                 {
-                    loadTrack(playlist[0]);
+                    loadTrack(playlist[0], 0.0);
                     playlistBox.selectRow(0);
                 }
             });
@@ -272,6 +283,23 @@ void PlayerGUI::buttonClicked(juce::Button* button)
             setBButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
         }
     }
+
+    if (button == &addMarkerButton)
+    {
+        addMarker();
+    }
+    if (button == &nextMarkerButton)
+    {
+        goToNextMarker();
+    }
+    if (button == &prevMarkerButton)
+    {
+        goToPrevMarker();
+    }
+    if (button == &clearMarkersButton)
+    {
+        clearMarkers();
+    }
 }
 
 
@@ -300,14 +328,14 @@ void PlayerGUI::timerCallback()
     double currentPos = playerAudio.getPosition();
 
     positionSlider.setRange(0.0, trackLength, juce::dontSendNotification);
-    if (loopPointA != -1.0 && loopPointB != -1.0) 
+    if (loopPointA != -1.0 && loopPointB != -1.0)
     {
-        
+
         if (currentPos >= loopPointB)
         {
-            
+
             playerAudio.setPosition(loopPointA);
-            
+
             currentPos = loopPointA;
         }
     }
@@ -331,21 +359,30 @@ void PlayerGUI::releaseResources()
 {
     playerAudio.releaseResources();
 }
-void PlayerGUI::loadTrack(const juce::File& file)
+
+void PlayerGUI::loadTrack(const juce::File& file, double startPosition)
 {
+    clearMarkers();
+
+    currentLoadedFile = file;
+
     juce::String metadataText = playerAudio.loadFile(file);
     if (metadataText.isNotEmpty())
     {
         playPauseButton.setButtonText("Pause");
         resetABLoop();
         thumbnail.setSource(new juce::FileInputSource(file));
-        metadataLabel.setText(metadataText, juce::dontSendNotification); 
+        metadataLabel.setText(metadataText, juce::dontSendNotification);
+
+        playerAudio.setPosition(startPosition);
     }
     else
     {
         metadataLabel.setText("Failed to load file: " + file.getFileName(), juce::dontSendNotification);
+        currentLoadedFile = juce::File{};
     }
 }
+
 int PlayerGUI::getNumRows()
 {
     return playlist.size();
@@ -371,6 +408,86 @@ void PlayerGUI::listBoxItemDoubleClicked(int row, const juce::MouseEvent&)
 {
     if (row >= 0 && row < playlist.size())
     {
-        loadTrack(playlist[row]); 
+        loadTrack(playlist[row], 0.0);
     }
+}
+
+void PlayerGUI::addFileToPlaylist(const juce::File& file)
+{
+    if (!playlist.contains(file))
+    {
+        playlist.add(file);
+        playlistBox.updateContent();
+    }
+
+    for (int i = 0; i < playlist.size(); ++i)
+    {
+        if (playlist[i] == file)
+        {
+            playlistBox.selectRow(i);
+            break;
+        }
+    }
+}
+
+void PlayerGUI::addMarker()
+{
+    double currentPos = playerAudio.getPosition();
+    if (!markers.contains(currentPos))
+    {
+        markers.add(currentPos);
+        markers.sort();
+        thumbnailComponent.repaint();
+    }
+}
+
+void PlayerGUI::goToNextMarker()
+{
+    double currentPos = playerAudio.getPosition();
+    for (double markerPos : markers)
+    {
+        if (markerPos > (currentPos + 0.1))
+        {
+            playerAudio.setPosition(markerPos);
+            return;
+        }
+    }
+
+    if (markers.size() > 0)
+    {
+        playerAudio.setPosition(markers[0]);
+    }
+}
+
+void PlayerGUI::goToPrevMarker()
+{
+    double currentPos = playerAudio.getPosition();
+    double prevMarker = -1.0;
+
+    for (double markerPos : markers)
+    {
+        if (markerPos < (currentPos - 0.1))
+        {
+            prevMarker = markerPos;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if (prevMarker != -1.0)
+    {
+        playerAudio.setPosition(prevMarker);
+    }
+    else if (markers.size() > 0)
+    {
+        playerAudio.setPosition(markers.getLast());
+    }
+}
+
+void PlayerGUI::clearMarkers()
+{
+    markers.clear();
+    thumbnailComponent.repaint();
 }
