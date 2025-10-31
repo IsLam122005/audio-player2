@@ -6,8 +6,8 @@ class WaveformDisplay : public juce::Component,
     public juce::ChangeListener
 {
 public:
-    WaveformDisplay(juce::AudioThumbnail& thumb)
-        : thumbnail(thumb)
+    WaveformDisplay(juce::AudioThumbnail& thumb, juce::Array<double>& mks) 
+        : thumbnail(thumb), markers(mks)
     {
         thumbnail.addChangeListener(this);
     }
@@ -24,12 +24,19 @@ public:
 
         if (thumbnail.getTotalLength() > 0.0)
         {
-            
+
             thumbnail.drawChannels(g,
                 getLocalBounds(),
-                0.0, 
-                thumbnail.getTotalLength(), 
-                1.0f); 
+                0.0,
+                thumbnail.getTotalLength(),
+                1.0f);
+
+            g.setColour(juce::Colours::yellow);
+            for (auto markerTime : markers)
+            {
+                float x = (float)(markerTime / thumbnail.getTotalLength()) * getWidth();
+                g.drawVerticalLine((int)x, 0.0f, (float)getHeight());
+            }
         }
         else
         {
@@ -48,6 +55,7 @@ public:
 
 private:
     juce::AudioThumbnail& thumbnail;
+    juce::Array<double>& markers; 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformDisplay)
 };
 
@@ -67,6 +75,7 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
+    void saveLastSession();
 
 private:
     PlayerAudio playerAudio;
@@ -103,5 +112,15 @@ private:
 
     juce::Slider speedSlider;
     juce::Label speedLabel;
+
+    juce::TextButton addMarkerButton{ "Add Marker" };
+    juce::TextButton prevMarkerButton{ "< Marker" };
+    juce::TextButton nextMarkerButton{ "Marker >" };
+    juce::Array<double> markers;
+
+    std::unique_ptr<juce::PropertiesFile> appProperties;
+    juce::File lastLoadedFile;
+    void loadLastSession();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };

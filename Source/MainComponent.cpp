@@ -10,6 +10,7 @@ MainComponent::MainComponent()
 
 MainComponent::~MainComponent()
 {
+    player1.saveLastSession();
     shutdownAudio();
 }
 
