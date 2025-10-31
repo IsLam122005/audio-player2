@@ -6,8 +6,8 @@ class WaveformDisplay : public juce::Component,
     public juce::ChangeListener
 {
 public:
-    WaveformDisplay(juce::AudioThumbnail& thumb)
-        : thumbnail(thumb)
+    WaveformDisplay(juce::AudioThumbnail& thumb, juce::Array<double>& markersArray)
+        : thumbnail(thumb), markers(markersArray) 
     {
         thumbnail.addChangeListener(this);
     }
@@ -22,14 +22,22 @@ public:
         g.fillAll(juce::Colours::darkgrey.darker());
         g.setColour(juce::Colours::lightgreen);
 
-        if (thumbnail.getTotalLength() > 0.0)
+        double audioLength = thumbnail.getTotalLength();
+
+        if (audioLength > 0.0)
         {
-            
             thumbnail.drawChannels(g,
                 getLocalBounds(),
-                0.0, 
-                thumbnail.getTotalLength(), 
-                1.0f); 
+                0.0,
+                audioLength,
+                1.0f);
+
+            g.setColour(juce::Colours::yellow); 
+            for (double markerTime : markers)
+            {
+                float x = (float)(markerTime / audioLength) * getWidth();
+                g.drawVerticalLine((int)x, 0.0f, (float)getHeight());
+            }
         }
         else
         {
@@ -48,6 +56,9 @@ public:
 
 private:
     juce::AudioThumbnail& thumbnail;
+
+    juce::Array<double>& markers;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformDisplay)
 };
 
@@ -56,7 +67,7 @@ class PlayerGUI : public juce::Component,
     public juce::Slider::Listener,
     public juce::Timer,
     public juce::ListBoxModel
-{   
+{
 public:
 
     PlayerGUI();
@@ -71,9 +82,15 @@ public:
     int getNumRows() override;
     void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
     void listBoxItemDoubleClicked(int row, const juce::MouseEvent&) override;
+
+    void loadTrack(const juce::File& file, double startPosition = 0.0);
+    void addFileToPlaylist(const juce::File& file);
+    juce::File getCurrentFile() const { return currentLoadedFile; }
+    double getCurrentPosition() const { return playerAudio.getPosition(); }
+
 private:
     PlayerAudio playerAudio;
-    juce::TextButton addFilesButton{ "Add Files" }; 
+    juce::TextButton addFilesButton{ "Add Files" };
     juce::TextButton restartButton{ "Restart" };
     juce::TextButton stopButton{ "Stop" };
     juce::TextButton loopButton{ "Loop" };
@@ -84,31 +101,44 @@ private:
     juce::Array<juce::File> playlist;
     juce::ListBox playlistBox;
 
-    void loadTrack(const juce::File& file); 
+    juce::File currentLoadedFile;
+
 
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
     juce::TextButton backwardButton{ "<< 10s" };
     juce::TextButton forwardButton{ "10s >>" };
-    juce::TextButton playPauseButton{ "Play" }; 
+    juce::TextButton playPauseButton{ "Play" };
     juce::TextButton goToStartButton{ "Start" };
-    juce::TextButton goToEndButton{ "End" }; 
+    juce::TextButton goToEndButton{ "End" };
     juce::Slider positionSlider;
-    juce::Label timeLabel;  
+    juce::Label timeLabel;
     juce::String formatTime(double seconds);
     juce::TextButton setAButton{ "Set A" };
     juce::TextButton setBButton{ "Set B" };
-    double loopPointA = -1.0; 
+    double loopPointA = -1.0;
     double loopPointB = -1.0;
     void resetABLoop();
     void timerCallback() override;
-    
+
     juce::AudioFormatManager formatManager;
     juce::AudioThumbnailCache thumbnailCache{ 5 };
     juce::AudioThumbnail thumbnail;
+
     WaveformDisplay thumbnailComponent;
 
     juce::Slider speedSlider;
     juce::Label speedLabel;
+
+    juce::TextButton addMarkerButton{ "Add Marker" };
+    juce::TextButton nextMarkerButton{ ">> M" };
+    juce::TextButton prevMarkerButton{ "M <<" };
+    juce::TextButton clearMarkersButton{ "Clear Markers" };
+    juce::Array<double> markers; 
+    void addMarker();
+    void goToNextMarker();
+    void goToPrevMarker();
+    void clearMarkers();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
