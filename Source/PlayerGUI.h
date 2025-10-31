@@ -2,6 +2,55 @@
 #include <JuceHeader.h>
 #include "PlayerAudio.h"
 
+class WaveformDisplay : public juce::Component,
+    public juce::ChangeListener
+{
+public:
+    WaveformDisplay(juce::AudioThumbnail& thumb)
+        : thumbnail(thumb)
+    {
+        thumbnail.addChangeListener(this);
+    }
+
+    ~WaveformDisplay() override
+    {
+        thumbnail.removeChangeListener(this);
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(juce::Colours::darkgrey.darker());
+        g.setColour(juce::Colours::lightgreen);
+
+        if (thumbnail.getTotalLength() > 0.0)
+        {
+            
+            thumbnail.drawChannels(g,
+                getLocalBounds(),
+                0.0, 
+                thumbnail.getTotalLength(), 
+                1.0f); 
+        }
+        else
+        {
+            g.setColour(juce::Colours::white);
+            g.drawText("No file loaded", getLocalBounds(), juce::Justification::centred);
+        }
+    }
+
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override
+    {
+        if (source == &thumbnail)
+        {
+            repaint();
+        }
+    }
+
+private:
+    juce::AudioThumbnail& thumbnail;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformDisplay)
+};
+
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
     public juce::Slider::Listener,
@@ -47,6 +96,12 @@ private:
     void resetABLoop();
     void timerCallback() override;
     
+    juce::AudioFormatManager formatManager;
+    juce::AudioThumbnailCache thumbnailCache{ 5 };
+    juce::AudioThumbnail thumbnail;
+    WaveformDisplay thumbnailComponent;
 
+    juce::Slider speedSlider;
+    juce::Label speedLabel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
