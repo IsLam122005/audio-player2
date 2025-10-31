@@ -11,7 +11,7 @@ public:
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
 
-    bool loadFile(const juce::File& file);
+    juce::String loadFile(const juce::File& file); 
     void play();
     void stop();
     void setGain(float gain);
