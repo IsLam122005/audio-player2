@@ -51,7 +51,7 @@ void PlayerAudio::toggleLooping(bool shouldLoop)
     }
 }
 
-bool PlayerAudio::loadFile(const juce::File& file)
+juce::String PlayerAudio::loadFile(const juce::File& file)
 {
     if (auto* reader = formatManager.createReaderFor(file))
     {
@@ -61,9 +61,7 @@ bool PlayerAudio::loadFile(const juce::File& file)
         readerSource.reset();
 
         readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, isLooping);
-
         transportSource.setSource(readerSource.get(), 0, nullptr, reader->sampleRate);
-
         resamplingSource = std::make_unique<juce::ResamplingAudioSource>(&transportSource, false, 2);
 
         if (storedSampleRate > 0)
@@ -73,11 +71,29 @@ bool PlayerAudio::loadFile(const juce::File& file)
 
         resamplingSource->setResamplingRatio(1.0);
         transportSource.start();
-        return true;
-    }
-    return false;
-}
 
+        auto& metadata = reader->metadataValues;
+        juce::String title = metadata.getValue("TITLE", "");
+        juce::String artist = metadata.getValue("ARTIST", "");
+
+        juce::String displayString;
+        if (title.isNotEmpty())
+        {
+            displayString = title;
+            if (artist.isNotEmpty())
+            {
+                displayString << " - " << artist;
+            }
+        }
+        else
+        {
+            displayString = file.getFileNameWithoutExtension();
+        }
+
+        return displayString; 
+    }
+    return juce::String();
+}
 void PlayerAudio::play()
 {
     transportSource.start();

@@ -54,10 +54,11 @@ private:
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
     public juce::Slider::Listener,
-    public juce::Timer 
-    
-{
+    public juce::Timer,
+    public juce::ListBoxModel
+{   
 public:
+
     PlayerGUI();
     ~PlayerGUI() override;
 
@@ -67,17 +68,23 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
-
+    int getNumRows() override;
+    void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
+    void listBoxItemDoubleClicked(int row, const juce::MouseEvent&) override;
 private:
     PlayerAudio playerAudio;
-
-    juce::TextButton loadButton{ "Load File" };
+    juce::TextButton addFilesButton{ "Add Files" }; 
     juce::TextButton restartButton{ "Restart" };
     juce::TextButton stopButton{ "Stop" };
     juce::TextButton loopButton{ "Loop" };
     juce::Slider volumeSlider;
     juce::TextButton muteButton{ "Mute" };
     std::unique_ptr<juce::FileChooser> fileChooser;
+    juce::Label metadataLabel;
+    juce::Array<juce::File> playlist;
+    juce::ListBox playlistBox;
+
+    void loadTrack(const juce::File& file); 
 
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
